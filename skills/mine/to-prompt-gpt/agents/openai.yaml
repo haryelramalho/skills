@@ -1,0 +1,4 @@
+interface:
+  display_name: "To Prompt GPT"
+  short_description: "Optimize prompts for GPT-5.5"
+  default_prompt: "Use $to-prompt-gpt to rewrite this request into a GPT-5.5-ready prompt."

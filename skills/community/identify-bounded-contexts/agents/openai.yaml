@@ -1,0 +1,4 @@
+interface:
+  display_name: "Identify Bounded Contexts"
+  short_description: "Map bounded contexts in codebases with DDD heuristics"
+  default_prompt: "Use $identify-bounded-contexts to identify bounded contexts in this codebase."

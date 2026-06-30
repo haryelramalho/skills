@@ -1,0 +1,4 @@
+interface:
+  display_name: "PR Review Brief"
+  short_description: "Summarize PR review inline with evidence."
+  default_prompt: "Summarize the review feedback on the current pull request and return the markdown inline in chat with per-point quotes, code context, decision impact, and links."

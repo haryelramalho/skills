@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Refactor QA"
+  short_description: "Run QA planning for refactors"
+  default_prompt: "Use $plan-refactor-qa with the refactor slug to inspect the task and run $qa-report before implementation."

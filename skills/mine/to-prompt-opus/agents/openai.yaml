@@ -1,0 +1,4 @@
+interface:
+  display_name: "To Prompt Opus"
+  short_description: "Optimize prompts for Claude Opus 4.8"
+  default_prompt: "Use $to-prompt-opus to rewrite this request into a Claude Opus 4.8-ready prompt."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture Placement"
+  short_description: "Decide DDD and clean architecture placement"
+  default_prompt: "Use $architecture-placement to decide where responsibilities belong before changing this feature."

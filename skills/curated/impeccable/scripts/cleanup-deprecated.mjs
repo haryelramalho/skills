@@ -25,7 +25,7 @@ import { join, resolve } from 'node:path';
 const DEPRECATED_NAMES = [
   // v2.0 renames
   'frontend-design',    // renamed to impeccable
-  'teach-impeccable',   // folded into /impeccable init
+  'teach-impeccable',   // folded into /impeccable teach
   // v2.1 merges
   'arrange',            // renamed to layout
   'normalize',          // merged into polish

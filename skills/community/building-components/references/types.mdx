@@ -59,9 +59,7 @@ export type CardRootProps = React.ComponentProps<"div"> & {
   variant?: "default" | "outlined";
 };
 
-export const CardRoot = ({ variant = "default", ...props }: CardRootProps) => (
-  <div {...props} />
-);
+export const CardRoot = ({ variant = "default", ...props }: CardRootProps) => <div {...props} />;
 ```
 
 ### Common HTML Attribute Types

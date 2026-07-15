@@ -1,275 +1,86 @@
 ---
 name: tanstack
-description: Comprehensive guide for TanStack ecosystem in React - Query/DB for data fetching, Form for form handling, and Router for client-side routing. Use when working with collections, live queries, optimistic updates, forms, validation, routing, URL parameters, or navigation.
+description: Comprehensive guide for the TanStack ecosystem in React — Query (caching, mutations, prefetching, SSR), DB (collections, live queries, optimistic updates), Form (state, validation, fields), Router (file-based, type-safe navigation, search params, loaders), and Start (server functions, middleware, auth, SSR). Use when working with any TanStack library in a React/full-stack project. Don't use for non-TanStack data libraries (SWR, Apollo, RTK Query), non-React TanStack ports (Solid, Svelte), or backend-only work.
 allowed-tools: Read, Grep, Glob
+metadata:
+  author: Pedro Nauck
+  github: https://github.com/pedronauck
+  repository: https://github.com/pedronauck/skills
 ---
-
 # TanStack Developer Guide
 
-This skill provides comprehensive patterns and best practices for the TanStack ecosystem in React applications:
+This SKILL.md is a **dispatcher**, not an encyclopedia. The load-bearing detail (code patterns, anti-patterns, edge cases, full checklists) lives in `references/*.md`. The tripwires below exist so you can detect violations during scanning — they are not the contract.
 
-- **TanStack Query/DB**: Data fetching, caching, collections, live queries, and optimistic updates
-- **TanStack Form**: Form state management, validation, and field components
-- **TanStack Router**: File-based routing, type-safe navigation, and URL parameters
+## Required Reading Router
 
-## Quick Start
+Match the task to the row. **Read the listed file(s) in full before producing output.** They are not appendices — they are the contract. Inline content in this SKILL.md is a pointer, not a substitute.
 
-For detailed examples and patterns, refer to the following files in the `references/` directory:
+| Task | MUST read |
+|------|-----------|
+| `useQuery` / `useMutation` / prefetch / infinite list / SSR hydration / cache config | `references/query-patterns.md` |
+| Typed collections, live queries, optimistic collection mutations | `references/db-patterns.md` |
+| Forms, field components, validation, async checks | `references/form-patterns.md` |
+| Routes, search params, loaders, navigation, auth-protected layouts, router setup | `references/router-patterns.md` |
+| Server functions, middleware, sessions, SSR streaming, env, deploy adapters | `references/start-patterns.md` |
+| Anything that touches **two or more** layers (e.g. route loader + server fn + form) | Each file from the relevant rows — read all before designing |
 
-- `references/query-patterns.md` - TanStack Query and TanStack DB patterns
-- `references/form-patterns.md` - TanStack Form patterns and components
-- `references/router-patterns.md` - TanStack Router patterns and navigation
+## Reference Index
 
----
-
-## TanStack Query/DB Overview
-
-TanStack DB extends TanStack Query with collections, live queries, and optimistic mutations. Key principle: load data into typed collections and consume through live queries that auto-update on data changes.
-
-### Critical Rules
-
-1. **Never Use React Query Patterns with Collections** - Collections have built-in mutation handling. Do NOT use `useMutation` + `invalidateQueries`.
-
-2. **Always Share Collection Instances** - Creating new collection instances for mutations causes "key not found" errors. The data-fetching hook must expose the collection, and mutation hooks must receive it as a parameter.
-
-3. **Configure Persistence Handlers** - Put server writes in collection handlers (`onInsert`, `onUpdate`, `onDelete`), not mutation hooks.
-
-4. **Single Canonical Collection Pattern** - Create ONE collection per entity type. Use live queries for filtered views.
-
-5. **Check Field Changes Properly** - Verify fields actually changed in `onUpdate`, not just that they exist.
-
-### Basic Collection Setup
-
-```typescript
-import { createCollection } from '@tanstack/react-db';
-import { queryCollectionOptions } from '@tanstack/query-db-collection';
-import { z } from 'zod';
-
-const itemSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1),
-  status: z.enum(['active', 'archived']),
-});
-
-const itemCollection = createCollection(
-  queryCollectionOptions({
-    queryKey: ['items'],
-    queryFn: async () => (await fetch('/api/items')).json(),
-    queryClient,
-    getKey: (item) => item.id,
-    schema: itemSchema,
-  })
-);
-```
-
-### Sharing Collection Instance (Critical Pattern)
-
-```typescript
-// CORRECT - share the instance
-export function useItems() {
-  const collection = useMemo(() => createItemsCollection(), []);
-  const { data } = useLiveQuery(collection);
-  return { data, collection }; // Expose collection
-}
-
-export function useUpdateItem(collection: ItemsCollection) {
-  return (id, data) => collection.update(id, data);
-}
-```
+| File | What you get |
+|------|--------------|
+| `references/query-patterns.md` | Vanilla Query: key factories + `queryOptions`, `staleTime`/`gcTime`, `placeholderData` vs `initialData`, optimistic mutations with rollback, error boundaries, intent prefetch, infinite queries, SSR dehydrate/hydrate, `useQueries`, cancellation, `select`, network mode, persistence, testing |
+| `references/db-patterns.md` | DB collections: 5 critical rules, collection setup, live queries with joins, optimistic updates, shared collection instances, persistence handlers, common anti-patterns, advanced patterns (computed, aggregations, pagination) |
+| `references/form-patterns.md` | Form: `createFormHook` + `useAppForm`, Zod schema validation, field/form/async validators with debounce, reusable field components (TextField, SelectField, SubmitButton), array fields, error handling with a11y, performance, anti-patterns |
+| `references/router-patterns.md` | Router: `declare module` registration, router defaults, `from` narrowing, pathless layouts, search-param Zod validation, parallel + deferred loaders, lazy + auto code splitting, custom serializers, `notFound()`, route masks, integration with TanStack Query |
+| `references/start-patterns.md` | Start: `createServerFn` with Zod validator, request + function middleware, secure cookie sessions, route protection, SSR streaming + hydration safety, prerender/ISR, API routes, env split, file separation, deploy adapters |
 
 ---
 
-## TanStack Form Overview
+## Tripwires (not the contract)
 
-TanStack Form provides headless form logic with automatic type inference and flexible validation.
+These bullets exist so you can spot likely violations during a scan. **They are deliberately incomplete.** The full rules, examples, and edge cases live in the reference files. If a tripwire triggers, you must consult the referenced file before fixing.
 
-### Core Principles
+### Query / DB
 
-- **Type Safety**: Types are inferred from default values - avoid manual generic declarations.
-- **Headless Design**: Build UI components to match your design system.
-- **Schema-First Validation**: Use Zod for cleaner, more maintainable validation.
+- Vanilla Query and DB collections are different paradigms — never mix them on the same entity.
+- `staleTime: 0` (default) refetches on every mount. Tune by data volatility.
+- Optimistic mutations without `cancelQueries` + rollback context will get overwritten by in-flight refetches.
 
-### Basic Form Setup with `createFormHook`
-
-```typescript
-import { createFormHookContexts, createFormHook } from '@tanstack/react-form'
-
-export const { fieldContext, formContext, useFieldContext } =
-  createFormHookContexts()
-
-export const { useAppForm } = createFormHook({
-  fieldContext,
-  formContext,
-  fieldComponents: {
-    TextField,
-    SelectField,
-  },
-  formComponents: {
-    SubmitButton,
-  },
-})
-```
-
-### Form Initialization
-
-```typescript
-const form = useAppForm({
-  defaultValues: {
-    username: '',
-    email: '',
-    age: 0,
-  },
-  validators: {
-    onChange: schema,
-  },
-  onSubmit: async ({ value }) => {
-    // Handle submission
-  },
-})
-```
-
-### Async Validation with Debouncing
-
-```typescript
-<form.Field
-  name="username"
-  asyncDebounceMs={500}
-  validators={{
-    onChangeAsync: async ({ value }) => {
-      const isAvailable = await checkUsernameAvailability(value)
-      return isAvailable ? undefined : 'Username already taken'
-    },
-  }}
-/>
-```
-
----
-
-## TanStack Router Overview
-
-TanStack Router provides type-safe file-based routing with first-class TypeScript support.
-
-### Core Principles
-
-- **Type-Safe Routing**: Embrace type-safe routing as the primary benefit.
-- **File-Based Routes**: Use file-based routing for scalability.
-- **Generated Route Tree**: Leverage the generated route tree for type safety.
-
-### File Structure
-
-```
-src/routes/
-├── __root.tsx          # Root layout with providers
-├── _authenticated.tsx  # Auth layout wrapper
-├── index.tsx          # Home page (/)
-├── posts/
-│   ├── index.tsx      # /posts
-│   └── $postId.tsx    # /posts/:postId (typed params)
-└── settings/
-    ├── _layout.tsx    # Settings layout
-    └── profile.tsx    # /settings/profile
-```
-
-### Basic Route with Search Params
-
-```typescript
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
-
-const searchSchema = z.object({
-  page: z.number().min(1).catch(1),
-  search: z.string().optional(),
-})
-
-export const Route = createFileRoute('/posts/')({
-  validateSearch: searchSchema,
-  component: PostsList,
-})
-
-function PostsList() {
-  const { page, search } = Route.useSearch()
-  // Use search params...
-}
-```
-
-### Authentication Layout
-
-```typescript
-// routes/_authenticated.tsx
-import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/_authenticated')({
-  beforeLoad: async ({ location }) => {
-    const isAuthenticated = checkAuth()
-    if (!isAuthenticated) {
-      throw redirect({
-        to: '/login',
-        search: { redirect: location.href },
-      })
-    }
-  },
-  component: () => <Outlet />,
-})
-```
-
-### Type-Safe Navigation
-
-```typescript
-import { Link, useNavigate } from '@tanstack/react-router'
-
-function Navigation() {
-  const navigate = useNavigate()
-
-  return (
-    <>
-      <Link
-        to="/posts/$postId"
-        params={{ postId: '123' }}
-        search={{ tab: 'comments' }}
-      >
-        View Post
-      </Link>
-
-      <button onClick={() => navigate({ to: '/posts', search: { page: 1 } })}>
-        Go to Posts
-      </button>
-    </>
-  )
-}
-```
-
----
-
-## Validation Checklist
-
-Before finishing a task involving TanStack:
-
-### Query/DB
-- [ ] Collection instances are shared between data-fetching and mutation hooks
-- [ ] Persistence handlers (`onInsert`, `onUpdate`, `onDelete`) are configured
-- [ ] No `useMutation` + `invalidateQueries` patterns with collections
-- [ ] One canonical collection per entity type
-- [ ] Field changes properly verified in `onUpdate` handlers
+**STOP. Read `references/query-patterns.md` in full before writing a `useQuery`, `useMutation`, prefetch, or SSR hydration boundary.** **STOP. Read `references/db-patterns.md` in full before creating a collection, live query, or persistence handler.** The three bullets above only flag the most common slip-ups.
 
 ### Form
-- [ ] Use `createFormHook` with `useAppForm` instead of raw `useForm` for consistency
-- [ ] Provide complete default values for proper type inference
-- [ ] Use Zod schemas for validation when possible
-- [ ] Debounce async validations (minimum 500ms recommended)
-- [ ] Prevent default on form submission
-- [ ] Display errors with proper accessibility (`role="alert"`)
+
+- `defaultValues` drives type inference — manual generics fight it.
+- Async validators without `asyncDebounceMs` hammer the network.
+- Reuse Zod schemas across form + server function (in `*.shared.ts`).
+
+**STOP. Read `references/form-patterns.md` in full before building or modifying a form, field component, or validator.** Field-level a11y attributes, `createFormHook` setup, and array-field patterns are not in this body.
 
 ### Router
-- [ ] Route path in `createFileRoute` matches file location
-- [ ] Search params use Zod validation with proper defaults (`.catch()`)
-- [ ] Loader dependencies are correctly specified in `loaderDeps`
-- [ ] Authentication routes use `beforeLoad` with proper redirects
-- [ ] Navigation uses typed `Link` or `useNavigate` hooks
-- [ ] Error boundaries are implemented at route level
 
-### General
-- [ ] Run `pnpm run typecheck` and `pnpm run test`
+- Without `declare module '@tanstack/react-router' { interface Register { router: typeof router } }`, `Link`/`useNavigate`/`useParams` silently degrade to `unknown`.
+- Sequential `await`s in a loader create waterfalls — fan out with `Promise.all`.
+- Throw `notFound()` / `redirect()` from loaders, not generic `Error`.
+
+**STOP. Read `references/router-patterns.md` in full before adding a route, changing router setup, writing a loader, or modifying search-param validation.** Defaults (`defaultPreload`, `scrollRestoration`, global error/404), pathless layouts, masks, and deferred loaders all live in the reference.
+
+### Start
+
+- Server logic belongs in `createServerFn` with a Zod `validator()` — not raw `fetch` + API routes.
+- Auth uses HTTP-only cookies. localStorage is XSS-bait.
+- SSR loaders should `await` only critical data; stream the rest via `prefetchQuery` + `Suspense`.
+
+**STOP. Read `references/start-patterns.md` in full before writing a server function, middleware, session helper, or SSR loader.** Cookie settings, middleware composition order, hydration-safety pitfalls, and adapter trade-offs are not in this body.
 
 ---
 
-For complete examples, edge cases, and advanced patterns, see the reference files in this skill directory.
+## End-of-task checklist
+
+Each reference file has a scoped checklist with the real validation criteria. This umbrella confirms you actually consulted them:
+
+- [ ] For each layer you touched, the corresponding reference file was read **in full**, not skimmed
+- [ ] The scoped checklist in that reference file passes
+- [ ] No mixed Query/DB paradigms on the same entity
+- [ ] `pnpm run typecheck` and `pnpm run test` pass
+
+If you cannot point to which reference file you read for a given change, the change is not done.

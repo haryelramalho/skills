@@ -138,8 +138,7 @@ function Item({
   size = "default",
   asChild = false,
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof itemVariants> & { asChild?: boolean }) {
+}: React.ComponentProps<"div"> & VariantProps<typeof itemVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "div";
   return (
     <Comp
@@ -389,8 +388,7 @@ function Clickable({ as: Element = 'button', ...props }) {
 Create fully type-safe polymorphic components:
 
 ```tsx
-type PolymorphicRef<E extends React.ElementType> =
-  React.ComponentPropsWithRef<E>["ref"];
+type PolymorphicRef<E extends React.ElementType> = React.ComponentPropsWithRef<E>["ref"];
 
 type PolymorphicProps<E extends React.ElementType, Props = {}> = Props &
   Omit<React.ComponentPropsWithoutRef<E>, keyof Props> & {
@@ -474,9 +472,7 @@ Warn when inappropriate elements are used:
 ```tsx
 function Button({ as: Element = "button", ...props }) {
   if (__DEV__ && Element === "div" && !props.role) {
-    console.warn(
-      'Button: When using as="div", provide role="button" for accessibility',
-    );
+    console.warn('Button: When using as="div", provide role="button" for accessibility');
   }
 
   return <Element {...props} />;
@@ -555,10 +551,7 @@ function Component({ as: Element = "div", ...props }: any) {
 }
 
 // ✅ Type safe
-function Component<E extends React.ElementType = "div">({
-  as,
-  ...props
-}: PolymorphicProps<E>) {
+function Component<E extends React.ElementType = "div">({ as, ...props }: PolymorphicProps<E>) {
   const Element = as || "div";
   return <Element {...props} />;
 }
@@ -571,12 +564,12 @@ Be aware of re-render implications:
 ```tsx
 // ❌ Creates new component on every render
 function Parent() {
-  const CustomDiv = (props) => <div {...props} />;
+  const CustomDiv = props => <div {...props} />;
   return <Component as={CustomDiv} />;
 }
 
 // ✅ Stable component reference
-const CustomDiv = (props) => <div {...props} />;
+const CustomDiv = props => <div {...props} />;
 function Parent() {
   return <Component as={CustomDiv} />;
 }

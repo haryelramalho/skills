@@ -1,7 +1,7 @@
 {
   "name": "visual-explainer",
-  "description": "Generate beautiful HTML pages for diagrams, diff reviews, plan reviews, and data tables",
-  "version": "0.6.2",
+  "description": "Generate beautiful HTML pages for diagrams, diff reviews, plan reviews, slides, and data tables",
+  "version": "0.8.1",
   "author": {
     "name": "nicobailon"
   },

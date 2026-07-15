@@ -1,8 +1,11 @@
 ---
 name: fix-coderabbit-review
-description: End-to-end remediation workflow for PR review feedback by PR number. Use when Codex must export CodeRabbit issues for a PR, fix every issue completely, commit all fixes in a single commit, and resolve GitHub review threads afterward.
+description: End-to-end remediation workflow for PR review feedback by PR number. Use when Codex must export CodeRabbit issues for a PR, fix every issue completely, commit all fixes in a single commit, and resolve GitHub review threads afterward. Don't use for general PR reviews unrelated to CodeRabbit, draft PRs without review threads, or merge-strategy decisions.
+metadata:
+  author: Pedro Nauck
+  github: https://github.com/pedronauck
+  repository: https://github.com/pedronauck/skills
 ---
-
 # Fix CodeRabbit Review
 
 Execute PR review remediation in a strict sequence: export issues, fix all issues, commit once, resolve threads.
@@ -31,7 +34,7 @@ Use bundled exporter script:
 
 ```bash
 PR_NUMBER=<pr-number>
-pnpm exec tsx .claude/skills/fix-coderabbit-review/scripts/pr-review.ts "$PR_NUMBER" --hide-resolved
+uv run .claude/skills/fix-coderabbit-review/scripts/pr_review.py "$PR_NUMBER" --hide-resolved
 ```
 
 Read generated files in:
@@ -95,7 +98,7 @@ After the single commit is created, resolve exported issue threads.
 Determine the issue range from issue files (example: `001` to `018`) and run:
 
 ```bash
-bash .claude/skills/fix-coderabbit-review/scripts/resolve_pr_issues.sh \
+uv run .claude/skills/fix-coderabbit-review/scripts/resolve_pr_issues.py \
   --pr-dir ai-docs/reviews-pr-<PR_NUMBER> \
   --from <first-issue-number> \
   --to <last-issue-number>

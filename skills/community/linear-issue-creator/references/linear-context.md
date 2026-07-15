@@ -60,7 +60,7 @@ Schema:
   "version": 2,
   "defaultTeamId": "uuid",
   "defaultTeamKey": "SAL",
-  "workspaceSlug": "workspace-slug",
+  "workspaceSlug": "salesmart",
   "defaultProjectId": "uuid or null",
   "defaultAssignee": "me or user-uuid or null",
   "defaultLabels": ["uuid", "uuid"],
@@ -112,7 +112,7 @@ This handles the v1→v2 upgrade path: pre-v2 configs lack `workspaceSlug` and t
    - If 1 team → auto-pick. Save `defaultTeamId`, `defaultTeamKey`.
    - If multiple → show picker, ask which is default.
 
-3. **Workspace slug discovery.** Linear's `list_teams` response sometimes contains an `organization.urlKey` field that maps to the workspace slug. If absent, ask the user explicitly: `Qual é o slug do teu workspace? (aparece em https://linear.app/<slug>/...). Ex: workspace-slug`. Save as `workspaceSlug`. Validate it's lowercase alphanumeric+hyphens. **Required — do not let the wizard finish without this.**
+3. **Workspace slug discovery.** Linear's `list_teams` response sometimes contains an `organization.urlKey` field that maps to the workspace slug. If absent, ask the user explicitly: `Qual é o slug do teu workspace? (aparece em https://linear.app/<slug>/...). Ex: salesmart`. Save as `workspaceSlug`. Validate it's lowercase alphanumeric+hyphens. **Required — do not let the wizard finish without this.**
 
 4. **User selection.** Call `list_users` for the chosen team.
    - Filter out bots/agents (users with email matching `*@linear.linear.app`, or display name "Linear").
@@ -169,7 +169,7 @@ When `mode=fallback` is set in Step 2 (intermittent MCP failure), the regular wi
 1. Try to load `~/.config/linear-issue-creator/config.json`. If it exists AND passes the required-field validation in "Configuration file → Required field validation" above, use the cached `workspaceSlug` and `defaultTeamKey` and skip to draft generation + `save-fallback.sh`. Skip everything else.
 
 2. If config is missing OR fails validation (pre-v2 format, corrupted, etc):
-   - Ask: `Qual é o slug do teu workspace Linear? (ex: workspace-slug)`. Validate lowercase alphanumeric+hyphens. Save just to memory for this run (not to disk — incomplete config).
+   - Ask: `Qual é o slug do teu workspace Linear? (ex: salesmart)`. Validate lowercase alphanumeric+hyphens. Save just to memory for this run (not to disk — incomplete config).
    - Ask: `Qual é a key do teu team? (ex: SAL)`. Validate uppercase alphanumeric. Save to memory.
    - Skip team/user/label/project discovery entirely. Generate the draft using ONLY the user's brief and template, no labels, no project, no assignee.
    - Pass `workspaceSlug` and `teamKey` to `save-fallback.sh` and finish.

@@ -21,7 +21,7 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadContext } from './context.mjs';
+import { loadContext } from './load-context.mjs';
 import { resolveFiles } from './live-inject.mjs';
 import { readLiveServerInfo } from './impeccable-paths.mjs';
 
@@ -80,7 +80,7 @@ The agent should then:
     process.exit(1);
   }
 
-  // 4. Load PRODUCT.md + DESIGN.md context.
+  // 4. Load PRODUCT.md + DESIGN.md context (auto-migrates legacy .impeccable.md)
   const ctx = loadContext(process.cwd());
 
   // 5. Compute drift-heal: compare resolved inject targets against the
@@ -102,6 +102,7 @@ The agent should then:
     hasDesign: ctx.hasDesign,
     design: ctx.design,
     designPath: ctx.designPath,
+    migrated: ctx.migrated,
   }, null, 2));
 }
 

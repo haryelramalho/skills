@@ -106,7 +106,7 @@ Tailwind supports arbitrary variants, making data attribute styling elegant:
     "data-[state=open]:animate-in data-[state=open]:fade-in",
     "data-[state=closed]:animate-out data-[state=closed]:fade-out",
     // Multiple attributes
-    "data-[state=open][data-side=top]:slide-in-from-top-2",
+    "data-[state=open][data-side=top]:slide-in-from-top-2"
   )}
 />
 ```
@@ -195,7 +195,7 @@ function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
         // Target specific child slots
         "has-[>[data-slot=checkbox-group]]:gap-3",
         "has-[>[data-slot=radio-group]]:gap-3",
-        className,
+        className
       )}
       {...props}
     />
@@ -206,11 +206,7 @@ function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
 ```tsx title="checkbox-group.tsx"
 function CheckboxGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="checkbox-group"
-      className={cn("flex flex-col gap-2", className)}
-      {...props}
-    />
+    <div data-slot="checkbox-group" className={cn("flex flex-col gap-2", className)} {...props} />
   );
 }
 ```
@@ -239,7 +235,7 @@ function Form({ className, ...props }: React.ComponentProps<"form">) {
         "has-[>[data-slot=inline-fields]]:space-y-2",
         // Style based on slot states
         "has-[[data-slot=submit-button][data-loading=true]]:opacity-50",
-        className,
+        className
       )}
       {...props}
     />
@@ -263,7 +259,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
         "[&_[data-slot=card-title]]:text-lg [&_[data-slot=card-title]]:font-semibold",
         "[&_[data-slot=card-description]]:text-sm [&_[data-slot=card-description]]:text-muted-foreground",
         "[&_[data-slot=card-footer]]:mt-4 [&_[data-slot=card-footer]]:border-t [&_[data-slot=card-footer]]:pt-4",
-        className,
+        className
       )}
       {...props}
     />
@@ -378,7 +374,7 @@ const Button = ({
         // Variant styles via props
         buttonVariants({ variant, size }),
         // Additional state styling allowed via className
-        className,
+        className
       )}
       disabled={disabled}
       {...props}

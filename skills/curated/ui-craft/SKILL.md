@@ -8,8 +8,11 @@ description: >-
   components, pages, dashboards, forms, dialogs, loading/empty/error states, or
   AI interfaces. Do not use for backend-only work, infrastructure, CLI/TUI
   design, or pure documentation editing.
+metadata:
+  author: Pedro Nauck
+  github: https://github.com/pedronauck
+  repository: https://github.com/pedronauck/skills
 ---
-
 # UI Craft
 
 ## The Fundamental Law
@@ -122,7 +125,7 @@ Before any visual decision (dark vs light, density, color register, motion inten
 
 If the scene does not force the answer, add detail until it does. Most weak visual decisions come from a missing scene — the rest comes from defaults (see `references/anti-defaults.md`).
 
-Cite: scene-driven decisions adapted from `impeccable` (compozy/agh).
+Cite: scene-driven decisions adapted from `impeccable` (pbakaus/impeccable).
 
 ### Register: Product or Brand
 
@@ -141,7 +144,7 @@ Decision rule:
 
 Switching registers mid-surface is the source of half of all "this feels off" reactions. Lock the register and design within its rules.
 
-Cite: register split adapted from `impeccable` (compozy/agh).
+Cite: register split adapted from `impeccable` (pbakaus/impeccable).
 
 ## The Anti-Slop Operating Loop
 
